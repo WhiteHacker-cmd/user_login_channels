@@ -1,0 +1,59 @@
+{% extends 'example/base.html' %}
+
+{% block content %}
+<ul class="list-group">
+
+</ul>
+    {% for message in messages %}
+        {{message}}<br>
+    {% endfor %}
+<!-- 
+<form id="chat">
+    <input id="message" type="text" value="this is"><br>
+    <button type="submit">Submit</button>
+</form> -->
+<input id="chat-message-input" type="text" size="100"/><br/>
+<input id="chat-message-submit" type="button" value="Send"/>
+
+    
+{% endblock %}
+{% block script %}
+<script>
+    var socket = new WebSocket('ws://' + window.location.host + window.location.pathname);
+    socket.onopen = function open(){
+        console.log('WebSockets connection created for chatting ...');
+       
+    }
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        socket.send(message);
+
+        messageInputDom.value = '';
+    };
+  
+    socket.onmessage = function message(event) {
+       var data = JSON.parse(event.data);
+       console.log(data["messages"]);
+       console.log(data["username"]);
+       var ul = document.querySelector(".list-group");
+       var li = document.createElement("li");
+       var li2 = document.createElement("li");
+
+
+       var message = document.createTextNode(data["messages"]);
+       var user = document.createTextNode(data["username"]);
+       li.appendChild(message);
+       li2.appendChild(user);
+       ul.appendChild(li);
+       ul.appendChild(li2);
+
+          };
+  
+    if (socket.readyState == WebSocket.OPEN) {
+    socket.onopen();
+    }
+
+</script>
+{% endblock %}
